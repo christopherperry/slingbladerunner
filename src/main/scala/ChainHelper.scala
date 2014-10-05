@@ -16,7 +16,7 @@ class ChainHelper(thisTitle: String) {
         else if (thatList.startsWith(list)) true else canChain(list.tail, acc = false)
       }
 
-      canChain(thisList.tail, acc = false)
+      canChain(thisList, acc = false)
     }
   }
 

@@ -14,6 +14,10 @@ class ChainHelperTest extends FunSuite {
     assert(!("one two three four six" canChain "two three four five"))
   }
 
+  test("canChain: should include case where first is entirely in second") {
+    assert("one two three" canChain "one two three four")
+  }
+
   test("canChain: should not chain these") {
     assert(!("AN INCONVENIENT TRUTH" canChain "WHERE THE TRUTH LIES"))
   }

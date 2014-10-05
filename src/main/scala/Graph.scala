@@ -33,34 +33,8 @@ class Graph {
     val visited: Iterable[List[Node]] = for (key <- nodes.keys) yield DFS(key)
     for (list <- visited) println("DFS visited length: " + list.size)
 
-    visited.toList.sortBy(list => list.size)
+    visited.toList.sortBy(_.size)
   }
-
-  /**
-   * The idea here is to reverse the DFS
-   * making sure to back up through matches on
-   * the previous movie title. This should, in theory,
-   * give the longest chain in the DFS.
-   * TODO: update with backtracking based on depth tag of nodes
-   */
-  //  def reverseDFS(dfs: List[String]): List[String] = {
-  //    def reverseDFS0(dec: List[String], acc: List[String]): List[String] = {
-  //      if (dec.isEmpty) acc
-  //      else {
-  //        val head: String = dec.head
-  //        val tail: List[String] = dec.tail
-  //
-  //        if (tail.isEmpty) head :: acc
-  //        else {
-  //          if (tail.head canChain head) reverseDFS0(tail.tail, head :: tail.head :: acc)
-  //          else reverseDFS0(tail.tail, acc)
-  //        }
-  //      }
-  //    }
-  //
-  //    val reverse: List[String] = dfs.reverse
-  //    reverseDFS0(reverse, List())
-  //  }
 
   def DFS(start: String): List[Node] = {
 
@@ -70,7 +44,7 @@ class Graph {
       else {
         println("Checking value: " + v)
         val newDepth = depth + 1
-        val neighbours: List[String] = nodes(v) filterNot (s => visited.foldLeft(false)((b, n) => b || n.title == s))
+        val neighbours: List[String] = nodes(v) filterNot (title => visited.exists(node => node.title == title))
 
         // marks v as visited, and recursively does dfs on the neighbors
         neighbours.foldLeft(Node(v, newDepth) :: visited)((b: List[Node], a: String) => DFS0(a, b, newDepth))
@@ -79,6 +53,12 @@ class Graph {
     DFS0(start, List(), 0)
   }
 
+  /**
+   * The idea here is to sort the DFS tree by depth
+   * making sure to back up through matches on
+   * the previous movie title. This should, in theory,
+   * give the longest chain in the DFS.
+   */
   def longestChain(dfs: List[Node]): List[String] = {
     val sorted: List[Node] = dfs.sortWith((lt, rt) => lt.depth > rt.depth)
 
