@@ -9,14 +9,17 @@ object SlingBladeRunner {
     println("Parsed movie file, building graph...")
 
     val graph = new GraphBuilder().build(movieList)
-    println("Built graph:")
-    println(graph)
+    println("Built graph, printing to file...")
+    val pw = new PrintWriter(new File("graph.txt"))
+    pw.println(graph)
+    pw.flush()
+    pw.close()
 
     // for each node visit the node, then visit each of it's adjacent nodes. Repeat
+    println("Doing DFSs on every node in the graph...")
     val allDFSs: List[List[Node]] = graph.allDFS()
 
     println("Finished all DFSs, now onto finding the longest chain...")
-
     val allLongestChains: List[List[String]] = for(dfs <- allDFSs) yield graph.longestChain(dfs)
 
     val longestChainsSorted: List[List[String]] = allLongestChains.sortWith((lt, rt) => lt.size > rt.size)

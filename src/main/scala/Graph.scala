@@ -11,7 +11,6 @@ class Graph {
   def +=(kv: (String, String)) = {
     if (nodes contains kv._1) nodes += (kv._1 -> (kv._2 :: nodes(kv._1)))
     else nodes += (kv._1 -> (kv._2 :: Nil))
-    this
   }
 
   def getAdjacent(key: String): List[String] = {
@@ -52,6 +51,27 @@ class Graph {
     }
     DFS0(start, List(), 0)
   }
+
+//  def DFS(start: String): List[Node] = {
+//    val white = 0
+//    val grey = 1
+//    val black = 2
+//
+//    def visit(node: Node, acc: List[Node], depth: Int): List[Node] = {
+//      if (node.mark != white) acc
+//      else {
+//        node.mark = grey
+//        val neighbors = nodes(node.title)
+//
+//        val newDepth = depth + 1
+//        for (neighbor <- neighbors) visit(Node(neighbor, newDepth), acc, newDepth)
+//        node.mark = black
+//        node :: acc
+//      }
+//    }
+//
+//    visit(Node(start, 0), List(), 0)
+//  }
 
   /**
    * The idea here is to sort the DFS tree by depth
