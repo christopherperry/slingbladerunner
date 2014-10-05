@@ -1,3 +1,5 @@
+import java.io.{File, PrintWriter}
+
 import scala.io.Source
 
 object SlingBladeRunner {
@@ -11,7 +13,10 @@ object SlingBladeRunner {
     println(graph)
 
     // for each node visit the node, then visit each of it's adjacent nodes. Repeat
-    println("Longest chain is: \n" + graph.longestDFS())
+    val longestDFS: List[Node] = graph.longestDFS().reverse
+    println("Longest dfs is: \n" + longestDFS)
+    val writer = new PrintWriter(new File("longest.txt"))
+    for (node <- longestDFS) writer.println(node)
   }
 
   def getMovies: List[String] = {

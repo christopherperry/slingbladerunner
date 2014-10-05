@@ -1,5 +1,7 @@
 
 class Graph {
+  implicit def stringWrapper(movieTitle: String) = new ChainHelper(movieTitle)
+
   private val nodes = scala.collection.mutable.Map[String, List[String]]()
 
   def add(s: String) = {
@@ -25,29 +27,60 @@ class Graph {
    * Do this for each DFS, then compare the longest chain from each.
    *
    */
-  def longestDFS(): List[String] = {
+  def longestDFS(): List[Node] = {
     // for each key, traverse adjacent
-    val searches: Iterable[List[String]] = for (key <- nodes.keys) yield DFS(key)
-    for (list <- searches) println("Chain length: " + list.size)
+    val visited: Iterable[List[Node]] = for (key <- nodes.keys) yield DFS(key)
+    for (list <- visited) println("DFS visited length: " + list.size)
 
-    //      searches.foldLeft(0)((acc, list) => if (list.size > acc) list.size else acc)
+    //      visited.foldLeft(0)((acc, list) => if (list.size > acc) list.size else acc)
 
-    searches.toList.sortBy(list => list.size).reverse.head
+    visited.toList.sortBy(list => list.size).reverse.head
   }
 
-  def DFS(start: String): List[String] = {
+  /**
+   * The idea here is to reverse the DFS
+   * making sure to back up through matches on
+   * the previous movie title. This should, in theory,
+   * give the longest chain in the DFS.
+   * TODO: update with backtracking based on depth tag of nodes
+   */
+//  def reverseDFS(dfs: List[String]): List[String] = {
+//    def reverseDFS0(dec: List[String], acc: List[String]): List[String] = {
+//      if (dec.isEmpty) acc
+//      else {
+//        val head: String = dec.head
+//        val tail: List[String] = dec.tail
+//
+//        if (tail.isEmpty) head :: acc
+//        else {
+//          if (tail.head canChain head) reverseDFS0(tail.tail, head :: tail.head :: acc)
+//          else reverseDFS0(tail.tail, acc)
+//        }
+//      }
+//    }
+//
+//    val reverse: List[String] = dfs.reverse
+//    reverseDFS0(reverse, List())
+//  }
 
-    def DFS0(v: String, visited: List[String]): List[String] = {
+  def DFS(start: String): List[Node] = {
+
+    def DFS0(v: String, visited: List[Node], depth: Int): List[Node] = {
       if (visited.contains(v))
         visited
       else {
         println("Checking value: " + v)
-        val neighbours: List[String] = nodes(v) filterNot visited.contains
-        neighbours.foldLeft(v :: visited)((b, a) => DFS0(a, b))
+        val newDepth = depth + 1
+        val neighbours: List[String] = nodes(v) filterNot (s => visited.foldLeft(false)((b, n) => b || n.title == s))
+
+        // marks v as visited, and recursively does dfs on the neighbors
+        neighbours.foldLeft(Node(v, newDepth) :: visited)((b: List[Node], a: String) => DFS0(a, b, newDepth))
       }
     }
-    DFS0(start, List()).reverse
+    DFS0(start, List(), 1)
   }
+
+
 
   override def toString = {
     def build: Iterable[String] = {
