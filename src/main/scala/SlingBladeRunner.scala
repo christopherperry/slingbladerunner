@@ -13,10 +13,24 @@ object SlingBladeRunner {
     println(graph)
 
     // for each node visit the node, then visit each of it's adjacent nodes. Repeat
-    val longestDFS: List[Node] = graph.longestDFS().reverse
-    println("Longest dfs is: \n" + longestDFS)
-    val writer = new PrintWriter(new File("longest.txt"))
-    for (node <- longestDFS) writer.println(node)
+    val allDFSs: List[List[Node]] = graph.allDFS()
+
+    println("Finished all DFSs, now onto finding the longest chain...")
+
+    val allLongestChains: List[List[String]] = for(dfs <- allDFSs) yield graph.longestChain(dfs)
+
+    val longestChainsSorted: List[List[String]] = allLongestChains.sortWith((lt, rt) => lt.size > rt.size)
+    for(chain <- longestChainsSorted) println("Chain Size: " + chain.size)
+
+    println("Longest chain found is: " + longestChainsSorted.head.size)
+
+    val writer = new PrintWriter(new File("longest_chain.txt"))
+    writer.println("Size of chain: " + longestChainsSorted.head.size)
+
+    for ((title: String) <- longestChainsSorted.head) writer.println(title)
+
+    writer.flush()
+    writer.close()
   }
 
   def getMovies: List[String] = {

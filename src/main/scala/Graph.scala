@@ -20,21 +20,20 @@ class Graph {
   }
 
   /**
-   * This gives the longest DFS.
+   * This gives the results of all DFSs, sorted by
+   * size of the resulting list
    *
    * IDEA: Search each DFS with some sort of look-ahead
    * algorithm that builds out all the chains within each DFS.
    * Do this for each DFS, then compare the longest chain from each.
    *
    */
-  def longestDFS(): List[Node] = {
+  def allDFS(): List[List[Node]] = {
     // for each key, traverse adjacent
     val visited: Iterable[List[Node]] = for (key <- nodes.keys) yield DFS(key)
     for (list <- visited) println("DFS visited length: " + list.size)
 
-    //      visited.foldLeft(0)((acc, list) => if (list.size > acc) list.size else acc)
-
-    visited.toList.sortBy(list => list.size).reverse.head
+    visited.toList.sortBy(list => list.size)
   }
 
   /**
@@ -44,24 +43,24 @@ class Graph {
    * give the longest chain in the DFS.
    * TODO: update with backtracking based on depth tag of nodes
    */
-//  def reverseDFS(dfs: List[String]): List[String] = {
-//    def reverseDFS0(dec: List[String], acc: List[String]): List[String] = {
-//      if (dec.isEmpty) acc
-//      else {
-//        val head: String = dec.head
-//        val tail: List[String] = dec.tail
-//
-//        if (tail.isEmpty) head :: acc
-//        else {
-//          if (tail.head canChain head) reverseDFS0(tail.tail, head :: tail.head :: acc)
-//          else reverseDFS0(tail.tail, acc)
-//        }
-//      }
-//    }
-//
-//    val reverse: List[String] = dfs.reverse
-//    reverseDFS0(reverse, List())
-//  }
+  //  def reverseDFS(dfs: List[String]): List[String] = {
+  //    def reverseDFS0(dec: List[String], acc: List[String]): List[String] = {
+  //      if (dec.isEmpty) acc
+  //      else {
+  //        val head: String = dec.head
+  //        val tail: List[String] = dec.tail
+  //
+  //        if (tail.isEmpty) head :: acc
+  //        else {
+  //          if (tail.head canChain head) reverseDFS0(tail.tail, head :: tail.head :: acc)
+  //          else reverseDFS0(tail.tail, acc)
+  //        }
+  //      }
+  //    }
+  //
+  //    val reverse: List[String] = dfs.reverse
+  //    reverseDFS0(reverse, List())
+  //  }
 
   def DFS(start: String): List[Node] = {
 
@@ -77,10 +76,26 @@ class Graph {
         neighbours.foldLeft(Node(v, newDepth) :: visited)((b: List[Node], a: String) => DFS0(a, b, newDepth))
       }
     }
-    DFS0(start, List(), 1)
+    DFS0(start, List(), 0)
   }
 
+  def longestChain(dfs: List[Node]): List[String] = {
+    val sorted: List[Node] = dfs.sortWith((lt, rt) => lt.depth > rt.depth)
 
+    def linkChain(node: Node, nodes: List[Node], acc: List[String]): List[String] = {
+      if (nodes.isEmpty) node.title :: acc
+      else {
+        val head: Node = nodes.head
+
+        if (node.depth == (head.depth + 1) && (head.title canChain node.title))
+          linkChain(head, nodes.tail, node.title :: acc)
+        else linkChain(node, nodes.tail, acc)
+
+      }
+    }
+
+    linkChain(sorted.head, sorted.tail, Nil)
+  }
 
   override def toString = {
     def build: Iterable[String] = {
