@@ -4,6 +4,7 @@ class GraphBuilder {
 
   def build(movieTitles: List[String]): Graph = {
     val graph = new Graph()
+
     for (key <- movieTitles) {
       graph.add(key)
       for (value <- movieTitles)

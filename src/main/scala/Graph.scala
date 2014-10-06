@@ -1,3 +1,4 @@
+import scala.collection.parallel.ParIterable
 
 class Graph {
   implicit def stringWrapper(movieTitle: String) = new ChainHelper(movieTitle)
@@ -28,10 +29,7 @@ class Graph {
    *
    */
   def allDFS(): List[List[Node]] = {
-    // for each key, traverse adjacent
-    val visited: Iterable[List[Node]] = for (key <- nodes.keys) yield DFS(key)
-    for (list <- visited) println("DFS visited length: " + list.size)
-
+    val visited: ParIterable[List[Node]] = nodes.keys.par.map(key => DFS(key))
     visited.toList.sortBy(_.size)
   }
 
@@ -41,37 +39,16 @@ class Graph {
       if (visited.contains(v))
         visited
       else {
-        println("Checking value: " + v)
-        val newDepth = depth + 1
         val neighbours: List[String] = nodes(v) filterNot (title => visited.exists(node => node.title == title))
 
         // marks v as visited, and recursively does dfs on the neighbors
+        val newDepth = depth + 1
         neighbours.foldLeft(Node(v, newDepth) :: visited)((b: List[Node], a: String) => DFS0(a, b, newDepth))
       }
     }
+
     DFS0(start, List(), 0)
   }
-
-//  def DFS(start: String): List[Node] = {
-//    val white = 0
-//    val grey = 1
-//    val black = 2
-//
-//    def visit(node: Node, acc: List[Node], depth: Int): List[Node] = {
-//      if (node.mark != white) acc
-//      else {
-//        node.mark = grey
-//        val neighbors = nodes(node.title)
-//
-//        val newDepth = depth + 1
-//        for (neighbor <- neighbors) visit(Node(neighbor, newDepth), acc, newDepth)
-//        node.mark = black
-//        node :: acc
-//      }
-//    }
-//
-//    visit(Node(start, 0), List(), 0)
-//  }
 
   /**
    * The idea here is to sort the DFS tree by depth

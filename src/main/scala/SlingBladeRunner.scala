@@ -20,13 +20,11 @@ object SlingBladeRunner {
     val allDFSs: List[List[Node]] = graph.allDFS()
 
     println("Finished all DFSs, now onto finding the longest chain...")
-    val allLongestChains: List[List[String]] = for(dfs <- allDFSs) yield graph.longestChain(dfs)
+    val allLongestChains: List[List[String]] = allDFSs.par.map(dfs => graph.longestChain(dfs)).toList
 
     val longestChainsSorted: List[List[String]] = allLongestChains.sortWith((lt, rt) => lt.size > rt.size)
-    for(chain <- longestChainsSorted) println("Chain Size: " + chain.size)
 
     println("Longest chain found is: " + longestChainsSorted.head.size)
-
     val writer = new PrintWriter(new File("longest_chain.txt"))
     writer.println("Size of chain: " + longestChainsSorted.head.size)
 

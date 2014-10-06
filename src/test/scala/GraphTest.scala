@@ -22,8 +22,8 @@ class GraphTest extends FunSuite {
     val list = List(
       Node("the big", 1),
       Node("pirates of the caribbean", 5),
-      Node("big dog", 2),
       Node("aaa", 2),
+      Node("big dog", 2),
       Node("bbb", 2),
       Node("dog the bounty hunter", 3),
       Node("ccc", 3),
