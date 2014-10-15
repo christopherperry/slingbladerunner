@@ -39,7 +39,7 @@ class Graph {
       if (visited.contains(v))
         visited
       else {
-        val neighbours: List[String] = nodes(v) filterNot (title => visited.exists(node => node.title == title))
+        val neighbours: List[String] = nodes(v).filterNot(title => visited.exists(node => node.title == title)).sortWith(_ < _)
 
         // marks v as visited, and recursively does dfs on the neighbors
         val newDepth = depth + 1
