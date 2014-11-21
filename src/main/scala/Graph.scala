@@ -27,7 +27,7 @@ class Graph {
 
     def DFS0(movieTitle: String, visited: List[String], accumulator: List[List[String]]): List[List[String]] = {
       val neighbours: List[String] = validNeighbors(movieTitle, visited)
-      if (neighbours.isEmpty || visited.size >= 100) {
+      if (neighbours.isEmpty) {
         val chain = visited :: accumulator
         val chainSize = visited.size
         if (chainSize  >= 230) {
