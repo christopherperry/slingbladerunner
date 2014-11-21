@@ -9,7 +9,7 @@ object SlingBladeRunner {
     val movieList: List[String] = getMovies
     println("Parsed movie file, building graph...")
 
-    val (graph, time1) = new GraphBuilder().build(movieList).elapsed()
+    val (graph, time1) = Graph(movieList).elapsed()
     println("Built graph, printing to file...")
 
     val pw = new PrintWriter(new File("graph.txt"))

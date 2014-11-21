@@ -1,24 +1,33 @@
 import scala.collection.parallel.ParIterable
 
-class Graph {
-  private val nodes = scala.collection.mutable.Map[String, List[String]]()
+object Graph {
+  implicit def stringWrapper(movieTitle: String) = new ChainHelper(movieTitle)
 
-  def add(s: String) = {
-    nodes += (s -> List())
+  def build(movieTitles: List[String]): Map[String, List[String]] = {
+    movieTitles.map(key => key -> buildValues(key, movieTitles)).toMap
   }
 
-  def +=(kv: (String, String)) = {
-    if (nodes contains kv._1) nodes += (kv._1 -> (kv._2 :: nodes(kv._1)))
-    else nodes += (kv._1 -> (kv._2 :: Nil))
+  def buildValues(key: String, values: List[String]): List[String] = {
+    def buildValues(key: String, values: List[String], acc: List[String]): List[String] = {
+      if (values.isEmpty) acc
+      else {
+        if (key canChain values.head) buildValues(key, values.tail, values.head :: acc)
+        else buildValues(key, values.tail, acc)
+      }
+    }
+
+    buildValues(key, values, List())
   }
 
-  def getAdjacent(key: String): List[String] = {
-    if (nodes contains key) nodes.apply(key)
-    else Nil
+  def apply(movieTitles: List[String]) = {
+    new Graph(build(movieTitles))
   }
+}
+
+class Graph(map: Map[String, List[String]]) {
 
   def longestChain(): List[String] = {
-    val visited: ParIterable[List[String]] = nodes.keys.par.map(key => DFS(key))
+    val visited: ParIterable[List[String]] = map.keys.par.map(key => DFS(key))
     visited.toList.sortWith(_.size > _.size).head.reverse
   }
 
@@ -30,8 +39,8 @@ class Graph {
       if (neighbours.isEmpty) {
         val chain = visited :: accumulator
         val chainSize = visited.size
-        if (chainSize  >= 245) {
-          println("Found chain: " + visited.size)
+        if (chainSize  >= 230) {
+          println(s"Found chain: $chainSize")
         }
         chain
       } else {
@@ -47,14 +56,14 @@ class Graph {
   }
 
   def validNeighbors(movieTitle: String, visited: List[String]): List[String] = {
-    nodes(movieTitle).filterNot(title => visited.contains(title))
+    map(movieTitle).filterNot(title => visited.contains(title))
   }
 
   override def toString = {
     def build: Iterable[String] = {
-      for (key <- nodes.keys) yield "[" + key + "] -> " + nodes(key).toList
+      for (key <- map.keys) yield "[" + key + "] -> " + map(key).toList
     }
 
-    "Number of nodes: " + nodes.size + "\n" + build.toList.sorted.mkString("\n")
+    "Number of nodes: " + map.size + "\n" + build.toList.sorted.mkString("\n")
   }
 }
