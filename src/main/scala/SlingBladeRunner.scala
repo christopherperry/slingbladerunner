@@ -1,4 +1,5 @@
 import java.io.{File, PrintWriter}
+import java.util.concurrent.TimeUnit.NANOSECONDS
 
 import scala.io.Source
 
@@ -8,28 +9,25 @@ object SlingBladeRunner {
     val movieList: List[String] = getMovies
     println("Parsed movie file, building graph...")
 
-    val graph = new GraphBuilder().build(movieList)
+    val (graph, time1) = new GraphBuilder().build(movieList).elapsed()
     println("Built graph, printing to file...")
+
     val pw = new PrintWriter(new File("graph.txt"))
+    pw.println(s"Time to build graph $time1")
     pw.println(graph)
     pw.flush()
     pw.close()
 
     // for each node visit the node, then visit each of it's adjacent nodes. Repeat
     println("Doing DFSs on every node in the graph...")
-    val allDFSs: List[List[Node]] = graph.allDFS()
+    val (longestChain, time2) = graph.longestChain().elapsed()
+    println("Longest chain found is: " + longestChain.size)
 
-    println("Finished all DFSs, now onto finding the longest chain...")
-    val allLongestChains: List[List[String]] = allDFSs.par.map(dfs => graph.longestChain(dfs)).toList
-
-    val longestChainsSorted: List[List[String]] = allLongestChains.sortWith((lt, rt) => lt.size > rt.size)
-
-    println("Longest chain found is: " + longestChainsSorted.head.size)
     val writer = new PrintWriter(new File("longest_chain.txt"))
-    writer.println("Size of chain: " + longestChainsSorted.head.size)
+    writer.println("Size of chain: " + longestChain.size)
+    writer.println(s"Time to find $time2")
 
-    for ((title: String) <- longestChainsSorted.head) writer.println(title)
-
+    for ((title: String) <- longestChain) writer.println(title)
     writer.flush()
     writer.close()
   }
@@ -39,5 +37,17 @@ object SlingBladeRunner {
     val movieList: List[String] = source.getLines().toList
     source.close()
     movieList
+  }
+
+  implicit class RichElapsed[A](f: => A) {
+
+    def elapsed(): (A, String) = {
+      val start = System.nanoTime()
+      val res = f
+      val end = System.nanoTime()
+
+      (res, NANOSECONDS.toSeconds(end - start) + " seconds")
+    }
+
   }
 }

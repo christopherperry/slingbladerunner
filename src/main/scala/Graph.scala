@@ -1,8 +1,6 @@
 import scala.collection.parallel.ParIterable
 
 class Graph {
-  implicit def stringWrapper(movieTitle: String) = new ChainHelper(movieTitle)
-
   private val nodes = scala.collection.mutable.Map[String, List[String]]()
 
   def add(s: String) = {
@@ -19,59 +17,37 @@ class Graph {
     else Nil
   }
 
-  /**
-   * This gives the results of all DFSs, sorted by
-   * size of the resulting list
-   *
-   * IDEA: Search each DFS with some sort of look-ahead
-   * algorithm that builds out all the chains within each DFS.
-   * Do this for each DFS, then compare the longest chain from each.
-   *
-   */
-  def allDFS(): List[List[Node]] = {
-    val visited: ParIterable[List[Node]] = nodes.keys.par.map(key => DFS(key))
-    visited.toList.sortBy(_.size)
+  def longestChain(): List[String] = {
+    val visited: ParIterable[List[String]] = nodes.keys.par.map(key => DFS(key))
+    visited.toList.sortWith(_.size > _.size).head.reverse
   }
 
-  def DFS(start: String): List[Node] = {
+  def DFS(start: String): List[String] = {
+    println(s"Starting search from: $start")
 
-    def DFS0(v: String, visited: List[Node], depth: Int): List[Node] = {
-      if (visited.contains(v))
-        visited
-      else {
-        val neighbours: List[String] = nodes(v).filterNot(title => visited.exists(node => node.title == title)).sortWith(_ < _)
-
+    def DFS0(movieTitle: String, visited: List[String], accumulator: List[List[String]]): List[List[String]] = {
+      val neighbours: List[String] = validNeighbors(movieTitle, visited)
+      if (neighbours.isEmpty || visited.size >= 100) {
+        val chain = visited :: accumulator
+        val chainSize = visited.size
+        if (chainSize  >= 230) {
+          println("Found chain: " + visited.size)
+        }
+        chain
+      } else {
         // marks v as visited, and recursively does dfs on the neighbors
-        val newDepth = depth + 1
-        neighbours.foldLeft(Node(v, newDepth) :: visited)((b: List[Node], a: String) => DFS0(a, b, newDepth))
+        val updatedVisited = movieTitle :: visited
+        neighbours.foldLeft(accumulator)((acc: List[List[String]], neighbor: String) => DFS0(neighbor, updatedVisited, acc))
       }
     }
 
-    DFS0(start, List(), 0)
+    val result: List[String] = DFS0(start, List(), List()).sortWith(_.size > _.size).head
+    println("Longest chain size this search: " + result.size)
+    result
   }
 
-  /**
-   * The idea here is to sort the DFS tree by depth
-   * making sure to back up through matches on
-   * the previous movie title. This should, in theory,
-   * give the longest chain in the DFS.
-   */
-  def longestChain(dfs: List[Node]): List[String] = {
-    val sorted: List[Node] = dfs.sortWith((lt, rt) => lt.depth > rt.depth)
-
-    def linkChain(node: Node, nodes: List[Node], acc: List[String]): List[String] = {
-      if (nodes.isEmpty) node.title :: acc
-      else {
-        val head: Node = nodes.head
-
-        if (node.depth == (head.depth + 1) && (head.title canChain node.title))
-          linkChain(head, nodes.tail, node.title :: acc)
-        else linkChain(node, nodes.tail, acc)
-
-      }
-    }
-
-    linkChain(sorted.head, sorted.tail, Nil)
+  def validNeighbors(movieTitle: String, visited: List[String]): List[String] = {
+    nodes(movieTitle).filterNot(title => visited.contains(title))
   }
 
   override def toString = {
