@@ -30,7 +30,7 @@ class Graph {
       if (neighbours.isEmpty) {
         val chain = visited :: accumulator
         val chainSize = visited.size
-        if (chainSize  >= 230) {
+        if (chainSize  >= 245) {
           println("Found chain: " + visited.size)
         }
         chain

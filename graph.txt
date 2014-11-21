@@ -1,4 +1,4 @@
-Time to build graph 24 seconds
+Time to build graph 25 seconds
 Number of nodes: 6561
 [10 ITEMS OR LESS] -> List(LESS THAN ZERO)
 [10 RILLINGTON PLACE] -> List()
