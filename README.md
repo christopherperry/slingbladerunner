@@ -1,3 +1,5 @@
+<img src="https://travis-ci.org/christopherperry/slingbladerunner.svg?branch=master" />
+
 slingbladerunner
 ================
 
